@@ -10,6 +10,8 @@ jobs:
   lint:
     name: Lint & type-check (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    env:
+      VENV_PY: ${{ runner.os == 'Windows' && '../.venv-ci/Scripts/python.exe' || '../.venv-ci/bin/python' }}
     strategy:
       fail-fast: false
       matrix:
@@ -29,20 +31,22 @@ jobs:
         working-directory: backend
         run: |
           uv venv --python 3.11 ../.venv-ci
-          uv pip install --python ../.venv-ci/bin/python -r requirements.txt -r requirements-dev.txt
+          uv pip install --python ${{ env.VENV_PY }} -r requirements.txt -r requirements-dev.txt
 
       - name: ruff
         working-directory: backend
-        run: ../.venv-ci/bin/python -m ruff check app/
+        run: ${{ env.VENV_PY }} -m ruff check app/
 
       - name: mypy
         working-directory: backend
-        run: ../.venv-ci/bin/python -m mypy app/
+        run: ${{ env.VENV_PY }} -m mypy app/
         continue-on-error: true  # mypy on mlx_whisper / faster_whisper will have missing imports; informational
 
   smoke-import:
     name: Smoke-test app import (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    env:
+      VENV_PY: ${{ runner.os == 'Windows' && '../.venv-ci/Scripts/python.exe' || '../.venv-ci/bin/python' }}
     strategy:
       fail-fast: false
       matrix:
@@ -62,12 +66,12 @@ jobs:
         working-directory: backend
         run: |
           uv venv --python 3.11 ../.venv-ci
-          uv pip install --python ../.venv-ci/bin/python -r requirements.txt
+          uv pip install --python ${{ env.VENV_PY }} -r requirements.txt
 
       - name: Verify app imports + backend selection works
         working-directory: backend
         env:
           WHISPER_BACKEND: fw
         run: |
-          ../.venv-ci/bin/python -c "import app.main; print('app.main import OK')"
-          ../.venv-ci/bin/python -c "from app.transcriber import select_backend; from app.backends.fw_backend import FasterWhisperBackend; b=FasterWhisperBackend(model='tiny'); print('fw-backend init OK:', b.model_name)"
+          ${{ env.VENV_PY }} -c "import app.main; print('app.main import OK')"
+          ${{ env.VENV_PY }} -c "from app.transcriber import select_backend; from app.backends.fw_backend import FasterWhisperBackend; b=FasterWhisperBackend(model='tiny'); print('fw-backend init OK:', b.model_name)"
