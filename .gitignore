@@ -1,0 +1,37 @@
+# Local Transcribe runtime artefacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+*.log
+
+# Model + ML caches (downloaded on first run, lives in user home via HF Hub)
+models/
+.cache/
+.huggingface/
+
+# Runtime artefacts
+logs/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Test / build artefacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Secrets / local overrides
+.env
+.env.local

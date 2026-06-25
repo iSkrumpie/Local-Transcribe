@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local Transcribe</title>
+  <link rel="icon" type="image/png" href="/static/logo.png" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img class="brand-logo" src="/static/logo.png" alt="Local Transcribe" />
+        <span class="brand-name">Local Transcribe</span>
+      </div>
+      <div class="status" id="status">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">idle</span>
+        <span class="status-meta" id="statusMeta"></span>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="transcript-wrap">
+        <textarea
+          id="transcript"
+          class="transcript"
+          spellcheck="false"
+          autocomplete="off"
+        ></textarea>
+        <div class="hint-overlay" id="hintOverlay" aria-hidden="false">
+          <div class="hint-box" role="dialog" aria-label="How to use Local Transcribe">
+            <div class="hint-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="2" width="6" height="13" rx="3"/>
+                <path d="M5 11a7 7 0 0 0 14 0"/>
+                <line x1="12" y1="18" x2="12" y2="22"/>
+                <line x1="8" y1="22" x2="16" y2="22"/>
+              </svg>
+            </div>
+            <h2 class="hint-title">Ready to transcribe</h2>
+            <p class="hint-line">
+              Press <kbd>Space</kbd> and start speaking.
+            </p>
+            <p class="hint-line">
+              Press <kbd>.</kbd> when you're done — the recording stops immediately,
+              so <strong>finish speaking first</strong>, otherwise the tail gets cut off.
+            </p>
+            <p class="hint-detail">
+              Live transcript grows here as you talk. Edit anything, then <kbd>⌘C</kbd> to copy.
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <img class="watermark" src="/static/logo.png" alt="" aria-hidden="true" />
+
+    <footer class="controls">
+      <div class="control-row">
+        <button id="btnRecord" class="btn btn-record" title="Record / Pause (Space)">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+          <span>Record</span>
+        </button>
+        <button id="btnPause" class="btn btn-pause" title="Pause (Space)" disabled>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
+          <span>Pause</span>
+        </button>
+        <button id="btnStop" class="btn btn-stop" title="Stop &amp; finalize (.)" disabled>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
+          <span>Stop</span>
+        </button>
+        <button id="btnCopy" class="btn btn-copy" title="Copy transcript (Ctrl/Cmd+C)">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          <span>Copy</span>
+        </button>
+        <button id="btnClear" class="btn btn-clear" title="Clear transcript">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          <span>Clear</span>
+        </button>
+      </div>
+
+      <div class="hint-bar">
+        <span><kbd>Space</kbd> record / pause</span>
+        <span><kbd>.</kbd> stop &amp; finalize</span>
+        <span><kbd>Ctrl/⌘ + C</kbd> copy</span>
+        <span class="lang-hint">Detected Language: <span id="detectedLang">—</span></span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
