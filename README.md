@@ -93,6 +93,185 @@ Override port: `python native/run.py start --port 9000`
 
 ---
 
+## Platform Setup
+
+The Quick Start above covers the happy path. This section spells out the
+exact commands per operating system — including alternative installs,
+NVIDIA-CUDA optional acceleration, and common pitfalls.
+
+### 🪟 Windows 10 / 11
+
+**Prereqs:** Windows 10 (build 19041+) or Windows 11, PowerShell or Command Prompt, ~3 GB free disk for the model.
+
+#### 1. Install Git
+```powershell
+winget install --id Git.Git
+```
+Or download from <https://git-scm.com/download/win>.
+
+#### 2. Install uv (Python package + venv manager)
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+**Alternatives:** `winget install --id astral-sh.uv` · `choco install uv` · `scoop install uv`.
+
+Restart PowerShell so `uv` lands on `PATH`. Verify:
+```powershell
+uv --version
+```
+> You're done with system-level installs. `uv` will pull a Python 3.11 interpreter on demand.
+
+#### 3. Clone & set up
+```powershell
+git clone https://github.com/iSkrumpie/Local-Transcribe.git
+cd Local-Transcribe
+python native\run.py setup
+```
+`setup` creates `native\.venv`, installs `fastapi`, `uvicorn`, `python-multipart`, and `faster-whisper` (CPU). First transcription downloads the model (~1.5–3 GB) automatically.
+
+#### 4. Run
+```powershell
+python native\run.py start    # background daemon
+start http://localhost:8000    # open in default browser
+```
+Allow the mic permission prompt. Tail logs any time with `python native\run.py logs`; pause with Ctrl+C.
+
+#### 5. Optional — NVIDIA CUDA acceleration
+Pre: NVIDIA GPU + matching NVIDIA driver installed.
+
+1. Install **CUDA Toolkit 12.x** from <https://developer.nvidia.com/cuda-toolkit-archive> and matching **cuDNN**.
+2. Wire cuBLAS / cuDNN into the venv:
+   ```powershell
+   python -m pip install nvidia-cublas-cu12 nvidia-cudnn-cu12
+   ```
+3. Set `FW_DEVICE=cuda` and restart:
+   ```powershell
+   $env:FW_DEVICE = "cuda"
+   python native\run.py restart
+   ```
+4. Verify with `python native\run.py status` — `device` should now report `cuda`.
+
+#### Common pitfalls (Windows)
+| Symptom | Fix |
+|---|---|
+| `'python' is not recognized as a cmdlet` | Use the full path to `python.exe` (e.g. `C:\Python311\python.exe`) or reinstall Python and tick **Add Python to PATH**. |
+| `ExecutionPolicy` blocks `install.ps1` | Run with `-ExecutionPolicy ByPass` (as shown in step 2). |
+| Antivirus quarantines uv binary | Allow `uv.exe` from `astral.sh` in Windows Defender / your AV. |
+| Port 8000 already in use | `netstat -ano \| findstr :8000` → `taskkill /PID <pid> /F`, or pick `--port 9000`. |
+| Mic permission denied | Click the mic icon in the browser address bar → Allow → reload. |
+
+---
+
+### 🐧 Linux (Ubuntu, Debian, Fedora, Arch, …)
+
+**Prereqs:** A modern Linux distro, bash/zsh/fish shell, build essentials for `faster-whisper` (gcc, make), ~3 GB free disk for the model.
+
+#### 1. Install Python 3.11 (optional — uv auto-installs it otherwise)
+
+```bash
+# Ubuntu / Debian (≥22.04 / 12)
+sudo apt update && sudo apt install -y python3.11 python3.11-venv
+
+# Fedora (≥38)
+sudo dnf install -y python3.11
+
+# Arch / Manjaro
+sudo pacman -S python311
+```
+3.10 or 3.12 also work natively; the launcher just prefers 3.11 if it's around.
+
+#### 2. Install Git
+```bash
+# Ubuntu / Debian
+sudo apt install -y git
+
+# Fedora
+sudo dnf install -y git
+
+# Arch
+sudo pacman -S git
+```
+
+#### 3. Install build essentials + uv
+
+```bash
+# Debian / Ubuntu
+sudo apt install -y build-essential
+
+# Fedora
+sudo dnf install -y gcc make
+
+# Arch
+sudo pacman -S base-devel
+```
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+Reload your shell: `source ~/.bashrc` (or `~/.zshrc` / `~/.config/fish/config.fish`).
+
+```bash
+uv --version
+```
+
+#### 4. Clone & set up
+```bash
+git clone https://github.com/iSkrumpie/Local-Transcribe.git
+cd Local-Transcribe
+python3 native/run.py setup
+```
+First transcription downloads the model (~1.5–3 GB) automatically.
+
+#### 5. Run
+```bash
+python3 native/run.py start    # background daemon
+xdg-open http://localhost:8000  # open in default browser
+# fallback: gnome-open / kde-open / wslview, depending on your DE
+```
+Allow the mic permission prompt. Tail logs any time with `python3 native/run.py logs`.
+
+#### 6. Optional — NVIDIA CUDA acceleration
+Pre: NVIDIA GPU + proprietary driver installed and working (`nvidia-smi` should show your card).
+
+1. Install CUDA Toolkit 12.x + cuDNN:
+   ```bash
+   # Ubuntu / Debian (NVIDIA's official repo path)
+   wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+   sudo dpkg -i cuda-keyring_1.1-1_all.deb
+   sudo apt update && sudo apt install -y cuda-toolkit-12-x libcudnn9
+
+   # Fedora
+   sudo dnf install -y cuda-toolkit cuda-cudnn
+   ```
+   See <https://docs.nvidia.com/cuda-12-x-installation-guide-linux/> for other distros.
+2. Wire cuBLAS / cuDNN into the venv:
+   ```bash
+   uv pip install --python .venv/bin/python nvidia-cublas-cu12 nvidia-cudnn-cu12
+   ```
+3. Set `FW_DEVICE=cuda` and restart:
+   ```bash
+   export FW_DEVICE=cuda
+   python3 native/run.py restart
+   ```
+4. Verify with `python3 native/run.py status` — `device` should now report `cuda`.
+
+#### 7. Optional — WSL (Windows Subsystem for Linux)
+The Linux instructions above apply inside WSL**2**.
+- **Microphone:** use the Windows-native install on the host; mic passthrough to WSL is fragile.
+- **Browser:** WSL auto-forwards localhost ports, so open <http://localhost:8000> on the Windows side.
+
+#### Common pitfalls (Linux)
+| Symptom | Fix |
+|---|---|
+| `python: command not found` | Use `python3`, or install it (`sudo apt install python3.11`). |
+| `uv: command not found` after install | Reload shell (`source ~/.bashrc`) or use `~/.local/bin/uv` directly. |
+| Port 8000 already in use | `sudo fuser -k 8000/tcp`, or pick `--port 9000`. |
+| Mic doesn't work on Wayland | Grant the browser explicit mic access via `pavucontrol` or `wpctl set-default …`. |
+| `error: Microsoft Visual C++ 14.0 is required` (Windows only) | Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/). |
+| `cryptography` / `pyav` wheels missing | Already handled nightly by `uv pip` — force `uv pip install --upgrade --force-reinstall faster-whisper`. |
+
+---
+
 ## Requirements
 
 **All platforms**
