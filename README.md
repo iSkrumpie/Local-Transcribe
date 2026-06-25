@@ -1,6 +1,6 @@
 # Local Transcribe
 
-![logo](backend/app/static/logo.png)
+![Screenshot](assets/screenshots/screenshot.png)
 
 Local-first, browser-based push-to-talk speech-to-text app — runs on **Linux, macOS, and Windows**.
 Press <kbd>Space</kbd> → speak → watch the text grow in the textarea → press <kbd>.</kbd> to finalize.
@@ -134,6 +134,9 @@ First run downloads the Whisper model (~1.5–3 GB) into the HuggingFace cache u
 ├── README.md
 ├── LICENSE
 ├── .gitignore
+├── assets/
+│   └── screenshots/
+│       └── screenshot.png      # README hero image
 ├── .github/
 │   └── workflows/
 │       └── ci.yml               # ruff + mypy + smoke-import on 3 OSes
