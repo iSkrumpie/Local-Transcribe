@@ -150,4 +150,4 @@ Issues and pull requests are welcome. For larger changes, open an issue first. T
 
 ## License
 
-[MIT](LICENSE) — Copyright (c) 2026 Timm
+[MIT](LICENSE) — Copyright (c) 2026 Skrumpie
